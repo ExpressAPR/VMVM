@@ -2,6 +2,7 @@ package java.edu.columbia.cs.psl.vmvm.runtime;
 
 import edu.columbia.cs.psl.vmvm.runtime.VMVMClassFileTransformer;
 import edu.columbia.cs.psl.vmvm.runtime.inst.Constants;
+import org.objectweb.asm.Opcodes;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
@@ -15,6 +16,11 @@ public class ReflectionWrapper {
 	private static Field getField(Class<?> clazz, String name) throws NoSuchFieldException {
 		return clazz.getField(name);
 	}
+	private static Field access(Field f) {
+		f.setAccessible(true);
+		return f;
+	}
+
 	public static void putStaticField(Object value, Class<?> clazz, String name) throws NoSuchFieldException {
 		Field f = getField(clazz, name);
 		Unsafe u = VMVMClassFileTransformer.getUnsafe();
@@ -124,69 +130,115 @@ public class ReflectionWrapper {
 		return ret;
 	}
 
+	private static void checkInternalFinal(Field f) throws IllegalAccessException {
+		// xmcp: check internal ENUM which means FINAL
+		if((f.getModifiers()&Opcodes.ACC_ENUM)!=0)
+			throw new IllegalAccessException(String.format("Can not set %s to any value (vmvm)", f));
+	}
+
 	public static void set(Field f, Object owner, Object val) throws IllegalArgumentException, IllegalAccessException {
 		tryToInit(f.getDeclaringClass());
+		boolean acc = f.isAccessible();
 		f.setAccessible(true);
+		checkInternalFinal(f);
 		if (f.getType() == MutableInstance.class) {
 			((MutableInstance) f.get(owner)).put(val);
-		} else
+		} else {
+			if(!acc)
+				f.setAccessible(false);
 			f.set(owner, val);
+		}
 	}
 	public static void setBoolean(Field f, Object owner, boolean val) throws IllegalArgumentException, IllegalAccessException {
 		tryToInit(f.getDeclaringClass());
+		boolean acc = f.isAccessible();
 		f.setAccessible(true);
+		checkInternalFinal(f);
 		if (f.getType() == MutableInstance.class) {
 			((MutableInstance) f.get(owner)).put(val);
-		} else
+		} else {
+			if(!acc)
+				f.setAccessible(false);
 			f.setBoolean(owner, val);
+		}
 	}
 	public static void setByte(Field f, Object owner, byte val) throws IllegalArgumentException, IllegalAccessException {
 		tryToInit(f.getDeclaringClass());
+		boolean acc = f.isAccessible();
 		f.setAccessible(true);
+		checkInternalFinal(f);
 		if (f.getType() == MutableInstance.class) {
 			((MutableInstance) f.get(owner)).put(val);
-		} else
+		} else {
+			if(!acc)
+				f.setAccessible(false);
 			f.setByte(owner, val);
+		}
 	}
 	public static void setChar(Field f, Object owner, char val) throws IllegalArgumentException, IllegalAccessException {
 		tryToInit(f.getDeclaringClass());
+		boolean acc = f.isAccessible();
 		f.setAccessible(true);
+		checkInternalFinal(f);
 		if (f.getType() == MutableInstance.class) {
 			((MutableInstance) f.get(owner)).put(val);
-		} else
+		} else {
+			if(!acc)
+				f.setAccessible(false);
 			f.setChar(owner, val);
+		}
 	}
 	public static void setDouble(Field f, Object owner, double val) throws IllegalArgumentException, IllegalAccessException {
 		tryToInit(f.getDeclaringClass());
+		boolean acc = f.isAccessible();
 		f.setAccessible(true);
+		checkInternalFinal(f);
 		if (f.getType() == MutableInstance.class) {
 			((MutableInstance) f.get(owner)).put(val);
-		} else
+		} else {
+			if(!acc)
+				f.setAccessible(false);
 			f.setDouble(owner, val);
+		}
 	}
 	public static void setInt(Field f, Object owner, int val) throws IllegalArgumentException, IllegalAccessException {
 		tryToInit(f.getDeclaringClass());
+		boolean acc = f.isAccessible();
 		f.setAccessible(true);
+		checkInternalFinal(f);
 		if (f.getType() == MutableInstance.class) {
 			((MutableInstance) f.get(owner)).put(val);
-		} else
+		} else {
+			if(!acc)
+				f.setAccessible(false);
 			f.setInt(owner, val);
+		}
 	}
 	public static void setFloat(Field f, Object owner, float val) throws IllegalArgumentException, IllegalAccessException {
 		tryToInit(f.getDeclaringClass());
+		boolean acc = f.isAccessible();
 		f.setAccessible(true);
+		checkInternalFinal(f);
 		if (f.getType() == MutableInstance.class) {
 			((MutableInstance) f.get(owner)).put(val);
-		} else
+		} else {
+			if(!acc)
+				f.setAccessible(false);
 			f.setFloat(owner, val);
+		}
 	}
 	public static void setLong(Field f, Object owner, long val) throws IllegalArgumentException, IllegalAccessException {
 		tryToInit(f.getDeclaringClass());
+		boolean acc = f.isAccessible();
 		f.setAccessible(true);
+		checkInternalFinal(f);
 		if (f.getType() == MutableInstance.class) {
 			((MutableInstance) f.get(owner)).put(val);
-		} else
+		} else {
+			if(!acc)
+				f.setAccessible(false);
 			f.setLong(owner, val);
+		}
 	}
 	
 
@@ -333,9 +385,9 @@ public class ReflectionWrapper {
 		if(VMVMClassFileTransformer.isIgnoredClass(clazz.getName().replace('.','/')))
 			return;
 		try {
-			boolean val = clazz.getField(Constants.VMVM_NEEDS_RESET).getBoolean(null);
+			boolean val = access(clazz.getField(Constants.VMVM_NEEDS_RESET)).getBoolean(null);
 			if (val) {
-				InterfaceReinitializer resetter = (InterfaceReinitializer) clazz.getField(Constants.VMVM_RESET_FIELD).get(null);
+				InterfaceReinitializer resetter = (InterfaceReinitializer) access(clazz.getField(Constants.VMVM_RESET_FIELD)).get(null);
 				resetter.__vmvmReClinit();
 			}
 		} catch (Throwable ex) {

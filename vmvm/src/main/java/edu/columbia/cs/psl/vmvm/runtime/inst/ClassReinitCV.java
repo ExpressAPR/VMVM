@@ -68,12 +68,22 @@ public class ClassReinitCV extends ClassVisitor {
 	}
 	@Override
 	public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
-		if(!isInterface && !isIgnoredField(access, name))
-			access = access & ~Opcodes.ACC_FINAL;
+		if(!isInterface && !isIgnoredField(access, name)) {
+			//access = access & ~Opcodes.ACC_FINAL;
+			// xmcp: use ENUM to represent FINAL
+			// see https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.5
+			if((access&Opcodes.ACC_FINAL)!=0) {
+				access = access & ~Opcodes.ACC_FINAL;
+				access = access | Opcodes.ACC_ENUM;
+			}
+		}
 		if((access & Opcodes.ACC_STATIC) != 0 && !isIgnoredField(access, name)) {
+			// xmcp: removed to fix org.apache.commons.lang3.reflect.FieldUtilsTest.testGetField
+			/*
 			access = access & ~Opcodes.ACC_PRIVATE;
 			access = access & ~Opcodes.ACC_PROTECTED;
 			access = access | Opcodes.ACC_PUBLIC;
+			 */
 			allStaticFields.add(new FieldNode(access, name, desc, signature, value));
 		}
 		return super.visitField(access, name, desc, signature, value);
@@ -94,11 +104,14 @@ public class ClassReinitCV extends ClassVisitor {
 		skipFrames = false;
 		if (version >= 100 || version <= 50)
 			skipFrames = true;
+		// xmcp: no more making classes as public
+		/*
 		if ((access & Opcodes.ACC_PUBLIC) == 0) {
 			access = access & ~Opcodes.ACC_PROTECTED;
 			access = access & ~Opcodes.ACC_PRIVATE;
 			access = access | Opcodes.ACC_PUBLIC;
 		}
+		 */
 		reClinitClassHelperVersions.put(this.className, this.version);
 		//Add signal interface
 		String[] newInterfaces = new String[interfaces.length + 1];
