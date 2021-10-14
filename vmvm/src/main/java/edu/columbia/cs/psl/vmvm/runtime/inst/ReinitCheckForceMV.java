@@ -84,8 +84,13 @@ public class ReinitCheckForceMV extends MethodVisitor {
 
 
 	private void addCheck(String owner){
+		// xmcp: this check aims to speedup by only adding instrument to the first invocation
+		// but this is unsound because "first" invocation may be skipped during runtime
+		// e.g. `if(true || Foo.bar) print(Foo.bar);`
+		/*
 		if(!checked.add(owner) && !this.name.contains("test"))
 			return;
+		 */
 		Label ok = new Label();
 		FrameNode fn = getCurrentFrame();
 		super.visitFieldInsn(Opcodes.GETSTATIC, owner, Constants.VMVM_NEEDS_RESET, "Z");
