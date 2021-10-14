@@ -25,6 +25,16 @@ public class VMVMClassFileTransformer implements ClassFileTransformer {
 	public static HashSet<String> ignoredClasses = new HashSet<>();
 	public static boolean isIgnoredClass(String internalName) {
 		internalName = internalName.replace('.','/');
+
+		// xmcp: added this bullshit
+		if(
+			internalName.equals("sun/awt/X11GraphicsEnvironment")
+			|| internalName.equals("java/awt/Font")
+			|| internalName.equals("sun/awt/AWTAccessor")
+			|| internalName.startsWith("javax/swing/")
+		)
+			return true;
+
 		if (isWhitelistedClass(internalName))
 			return false;
 		if(ignoredClasses.contains(internalName))
@@ -45,11 +55,20 @@ public class VMVMClassFileTransformer implements ClassFileTransformer {
 						|| internalName.startsWith("org/apache/maven/surefire") || internalName.startsWith("org/apache/tools/")
 						|| internalName.startsWith("org/mockito") || internalName.startsWith("mockit")
 						|| internalName.startsWith("org/powermock")
-						|| internalName.startsWith("com/jprofiler");
+						|| internalName.startsWith("com/jprofiler")
+				|| internalName.startsWith("net/sf/cglib/") // used by some objectasm thing
+
+			;
 	}
 
 	public static boolean isWhitelistedClass(String internalName) {
-		return internalName.startsWith("javax/servlet") || internalName.startsWith("com/sun/jini") || internalName.startsWith("java/awt") || internalName.startsWith("javax/swing") || internalName.startsWith("javax/xml") || internalName.startsWith("sun/awt");
+		return
+			internalName.startsWith("javax/servlet")
+				|| internalName.startsWith("com/sun/jini")
+				|| internalName.startsWith("java/awt")
+				|| internalName.startsWith("javax/swing")
+				|| internalName.startsWith("javax/xml")
+				|| internalName.startsWith("sun/awt");
 	}
 
 	public static boolean isClassThatNeedsReflectionHacked(String internalName) {
