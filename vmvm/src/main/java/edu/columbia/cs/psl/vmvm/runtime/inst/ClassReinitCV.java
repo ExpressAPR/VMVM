@@ -68,6 +68,7 @@ public class ClassReinitCV extends ClassVisitor {
 	}
 	@Override
 	public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
+		int orig_access = access;
 		if(!isInterface && !isIgnoredField(access, name)) {
 			//access = access & ~Opcodes.ACC_FINAL;
 			// xmcp: use ENUM to represent FINAL
@@ -77,7 +78,7 @@ public class ClassReinitCV extends ClassVisitor {
 				access = access | Opcodes.ACC_ENUM;
 			}
 		}
-		if((access & Opcodes.ACC_STATIC) != 0 && !isIgnoredField(access, name)) {
+		if((orig_access & Opcodes.ACC_STATIC) != 0 && !isIgnoredField(orig_access, name)) {
 			// xmcp: removed to fix org.apache.commons.lang3.reflect.FieldUtilsTest.testGetField
 			/*
 			access = access & ~Opcodes.ACC_PRIVATE;

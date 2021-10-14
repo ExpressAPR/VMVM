@@ -130,17 +130,20 @@ public class ReflectionWrapper {
 		return ret;
 	}
 
-	private static void checkInternalFinal(Field f) throws IllegalAccessException {
+	private static void checkInternalFinal(Field f, boolean acc) throws IllegalAccessException {
 		// xmcp: check internal ENUM which means FINAL
-		if((f.getModifiers()&Opcodes.ACC_ENUM)!=0)
-			throw new IllegalAccessException(String.format("Can not set %s to any value (vmvm)", f));
+		if(!acc && (f.getModifiers()&Opcodes.ACC_ENUM)!=0)
+			throw new IllegalAccessException(String.format("Can not set FINAL %s to any value (vmvm)", f));
+		// Lang 6 FieldUtilsTest: seems that STATIC FINAL fields cannot be written even with acc set to true
+		if((f.getModifiers()&Opcodes.ACC_ENUM)!=0 && (f.getModifiers()&Opcodes.ACC_STATIC)!=0)
+			throw new IllegalAccessException(String.format("Can not set STATIC FINAL %s to any value (vmvm)", f));
 	}
 
 	public static void set(Field f, Object owner, Object val) throws IllegalArgumentException, IllegalAccessException {
 		tryToInit(f.getDeclaringClass());
 		boolean acc = f.isAccessible();
 		f.setAccessible(true);
-		checkInternalFinal(f);
+		checkInternalFinal(f, acc);
 		if (f.getType() == MutableInstance.class) {
 			((MutableInstance) f.get(owner)).put(val);
 		} else {
@@ -153,7 +156,7 @@ public class ReflectionWrapper {
 		tryToInit(f.getDeclaringClass());
 		boolean acc = f.isAccessible();
 		f.setAccessible(true);
-		checkInternalFinal(f);
+		checkInternalFinal(f, acc);
 		if (f.getType() == MutableInstance.class) {
 			((MutableInstance) f.get(owner)).put(val);
 		} else {
@@ -166,7 +169,7 @@ public class ReflectionWrapper {
 		tryToInit(f.getDeclaringClass());
 		boolean acc = f.isAccessible();
 		f.setAccessible(true);
-		checkInternalFinal(f);
+		checkInternalFinal(f, acc);
 		if (f.getType() == MutableInstance.class) {
 			((MutableInstance) f.get(owner)).put(val);
 		} else {
@@ -179,7 +182,7 @@ public class ReflectionWrapper {
 		tryToInit(f.getDeclaringClass());
 		boolean acc = f.isAccessible();
 		f.setAccessible(true);
-		checkInternalFinal(f);
+		checkInternalFinal(f, acc);
 		if (f.getType() == MutableInstance.class) {
 			((MutableInstance) f.get(owner)).put(val);
 		} else {
@@ -192,7 +195,7 @@ public class ReflectionWrapper {
 		tryToInit(f.getDeclaringClass());
 		boolean acc = f.isAccessible();
 		f.setAccessible(true);
-		checkInternalFinal(f);
+		checkInternalFinal(f, acc);
 		if (f.getType() == MutableInstance.class) {
 			((MutableInstance) f.get(owner)).put(val);
 		} else {
@@ -205,7 +208,7 @@ public class ReflectionWrapper {
 		tryToInit(f.getDeclaringClass());
 		boolean acc = f.isAccessible();
 		f.setAccessible(true);
-		checkInternalFinal(f);
+		checkInternalFinal(f, acc);
 		if (f.getType() == MutableInstance.class) {
 			((MutableInstance) f.get(owner)).put(val);
 		} else {
@@ -218,7 +221,7 @@ public class ReflectionWrapper {
 		tryToInit(f.getDeclaringClass());
 		boolean acc = f.isAccessible();
 		f.setAccessible(true);
-		checkInternalFinal(f);
+		checkInternalFinal(f, acc);
 		if (f.getType() == MutableInstance.class) {
 			((MutableInstance) f.get(owner)).put(val);
 		} else {
@@ -231,7 +234,7 @@ public class ReflectionWrapper {
 		tryToInit(f.getDeclaringClass());
 		boolean acc = f.isAccessible();
 		f.setAccessible(true);
-		checkInternalFinal(f);
+		checkInternalFinal(f, acc);
 		if (f.getType() == MutableInstance.class) {
 			((MutableInstance) f.get(owner)).put(val);
 		} else {
