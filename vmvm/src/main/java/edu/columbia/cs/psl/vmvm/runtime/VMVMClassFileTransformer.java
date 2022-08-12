@@ -26,6 +26,10 @@ public class VMVMClassFileTransformer implements ClassFileTransformer {
 	public static boolean isIgnoredClass(String internalName) {
 		internalName = internalName.replace('.','/');
 
+		// xmcp: ignore testkit because it runs on top of junit
+		if(internalName.startsWith("expressapr/testkit/"))
+			return true;
+
 		// xmcp: added this bullshit
 		if(
 			internalName.equals("sun/awt/X11GraphicsEnvironment")
@@ -48,8 +52,8 @@ public class VMVMClassFileTransformer implements ClassFileTransformer {
 						|| internalName.startsWith("sun")
 				|| internalName.startsWith("com/sun/java/util/jar")
 						|| internalName.startsWith("edu/columbia/cs/psl/vmvm/runtime")
-						|| internalName.startsWith("org/junit")
-						|| internalName.startsWith("junit/")
+						//|| internalName.startsWith("org/junit") // xmcp: why?
+						//|| internalName.startsWith("junit/") // xmcp: why?
 						|| internalName.startsWith("java/edu/columbia/cs/psl/vmvm")
 						|| internalName.startsWith("edu/columbia/cs/psl/vmvm/")
 						|| internalName.startsWith("org/apache/maven/surefire") || internalName.startsWith("org/apache/tools/")
