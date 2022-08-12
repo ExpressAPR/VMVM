@@ -10,3 +10,5 @@ experiments/
 **/.settings/
 **/.project
 **/.classpath
+
+/.idea
