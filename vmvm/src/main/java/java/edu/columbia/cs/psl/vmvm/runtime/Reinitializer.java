@@ -21,7 +21,7 @@ public final class Reinitializer {
 	public static final String INTERNAL_NAME = "java/edu/columbia/cs/psl/vmvm/runtime/Reinitializer";
 
 	public static Instrumentation inst;
-	private static final boolean DEBUG = System.getenv("DEBUG") != null;
+	private static final boolean DEBUG = System.getenv("VMVM_DEBUG") != null;
 
 	static LinkedList<WeakReference<Class>> classesToReinit = new LinkedList<WeakReference<Class>>();
 	public static HashSet<String> classesNotYetReinitialized = new HashSet<String>();
@@ -104,6 +104,10 @@ public final class Reinitializer {
 		LinkedList<WeakReference<Class>> toReinit = classesToReinit;
 		classesToReinit = new LinkedList<WeakReference<Class>>();
 		classesNotYetReinitialized.clear();
+
+		if(DEBUG)
+			System.out.printf("VMVM: mark begin %d\n", toReinit.size());
+
 		for (WeakReference<Class> w : toReinit) {
 			if (w.get() != null) {
 				Class c = w.get();
@@ -115,7 +119,7 @@ public final class Reinitializer {
 					continue;
 				}
 				if(DEBUG)
-					System.out.println("Reinit: " + c.getName());
+					System.out.println("VMVM: mark reinit " + c.getName());
 				classesNotYetReinitialized.add(c.getName());
 				try {
 					Field f = c.getField(Constants.VMVM_NEEDS_RESET);
@@ -132,6 +136,10 @@ public final class Reinitializer {
 
 			}
 		}
+
+		if(DEBUG)
+			System.out.printf("VMVM: mark end %d\n", toReinit.size());
+
 		Thread.currentThread().setContextClassLoader(ClassLoader.getSystemClassLoader());
 
 	}
@@ -161,14 +169,17 @@ public final class Reinitializer {
 	}
 
 	public static final void reinitCalled(Class c) {
-//		System.err.println("Reinit: " + c);
+		// xmcp: added log
+		if(DEBUG)
+			System.out.println("VMVM: REinit called " + c.getCanonicalName() + " in " + Thread.currentThread().getName());
 		classesNotYetReinitialized.remove(c.getName());
 		classesToReinit.add(new WeakReference<Class>(c));
 	}
 
 	public static final InterfaceReinitializer clinitCalled(Class c) {
-//		if (VMVMClassFileTransformer.DEBUG)
-//			System.out.println("CLinit called " + c.clazz + " in " + Thread.currentThread().getName());
+		// xmcp: added log
+		if(DEBUG)
+			System.out.println("VMVM: CLinit called " + c.getCanonicalName() + " in " + Thread.currentThread().getName());
 		classesToReinit.add(new WeakReference<Class>(c));
 		//TODO create the anonymous class here
 

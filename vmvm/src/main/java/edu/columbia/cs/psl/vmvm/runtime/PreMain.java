@@ -10,7 +10,7 @@ public class PreMain {
 	public static boolean IS_RUNTIME_INST = true;
 
 	public static void premain(String args, Instrumentation inst) {
- 		System.out.println("xmcp: vmvm premain running");
+ 		System.out.println("express-apr: vmvm premain running");
 		Reinitializer.inst = inst;
 		if(args != null)
 			Utils.ignorePattern = args;
